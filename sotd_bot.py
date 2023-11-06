@@ -81,7 +81,10 @@ class SOTDBot(discord.Bot):
 
         current_total_minutes = minute + (hour * 60)
 
-        time_list = sorted(self.times.keys(), key=lambda x: (((x.minute + (x.hour * 60)) - current_total_minutes) % 1440 + 1440) % 1440)
+        time_list = sorted(
+            self.times.keys(),
+            key=lambda x: (((x.minute + (x.hour * 60))
+                            - current_total_minutes) % 1440 + 1440) % 1440)
         try:
             self.next_time = time_list[0]
         except IndexError:
@@ -146,6 +149,15 @@ class SOTDBot(discord.Bot):
 
         self.save_config()
 
+    def clear_notification_role(self, guild_id):
+        try:
+            self.config[guild_id].pop("mention_role")
+        except KeyError:
+            return
+
+        self.save_config()
+
+
     def set_time(self, guild_id, time):
         try:
             guild_config = self.config[guild_id]
@@ -203,7 +215,11 @@ class SOTDBot(discord.Bot):
         for playlist in playlists:
             offset = 0
             while True:
-                playlist_items = self.spotipy_app.playlist_items(playlist_id=playlist, limit=50, offset=offset)
+                playlist_items = self.spotipy_app.playlist_items(
+                    playlist_id=playlist,
+                    limit=50,
+                    offset=offset
+                )
                 for item in playlist_items["items"]:
                     url = item["track"]["external_urls"]["spotify"]
                     aggregate_playlist_items.append(url)
@@ -304,7 +320,8 @@ if __name__ == "__main__":
     ):
         try:
             bot.remove_playlist(str(ctx.guild_id), playlist)
-            message = f"Successfully removed playlist: `{playlist}` from the pool."
+            message = (f"Successfully removed playlist: `{playlist}` from the "
+                       f"pool.")
         except ValueError as e:
             message = str(e)
         await ctx.respond(message)
@@ -329,10 +346,15 @@ if __name__ == "__main__":
                 and channel.permissions_for(ctx.me).view_channel):
             bot.set_channel(str(ctx.guild_id), channel.id)
             await ctx.respond(
-                f"Channel to which to post songs has been set to {channel.mention}.")
+                f"Channel to which to post songs has been set to "
+                f"{channel.mention}."
+            )
         else:
             await ctx.respond(
-                f"The permissions of {channel.mention} prevent the the bot from posting songs there. Please choose a different channel or change the permissions.")
+                f"The permissions of {channel.mention} prevent the the bot "
+                f"from posting songs there. Please choose a different channel "
+                f"or change the permissions."
+            )
 
 
     @bot.slash_command(
@@ -359,6 +381,16 @@ if __name__ == "__main__":
         await ctx.respond(f"Set the notification role to {role_mention}.")
 
     @bot.slash_command(
+        name="clear_role",
+        description="Clears any selected role from being notified when a song "
+                    "is posted."
+    )
+    async def clear_role(ctx: discord.ApplicationContext):
+        bot.clear_notification_role(str(ctx.guild_id))
+        await ctx.respond("Cleared any selected role from being notified when "
+                          "a song is posted.")
+
+    @bot.slash_command(
         name="set_time",
         description="Set the daily time at which a random song will be posted"
     )
@@ -376,11 +408,15 @@ if __name__ == "__main__":
             )
     ):
         if not 0 <= hour <= 23:
-            await ctx.respond("Invalid value for `hour`. It must be a value greater than or equal to *0* and less than or equal to *23*")
+            await ctx.respond("Invalid value for `hour`. It must be a value "
+                              "greater than or equal to *0* and less than or "
+                              "equal to *23*")
             return
 
         if not 0 <= minute <= 59:
-            await ctx.respond("Invalid value for `minute`. It must be a value greater than or equal to *0* and less than or equal to *59*")
+            await ctx.respond("Invalid value for `minute`. It must be a value "
+                              "greater than or equal to *0* and less than or "
+                              "equal to *59*")
             return
         str_time = f"{str(hour).zfill(2)}:{str(minute).zfill(2)}"
         bot.set_time(str(ctx.guild_id), str_time)
@@ -394,24 +430,31 @@ if __name__ == "__main__":
         await ctx.respond("Please wait")
         track = bot.get_random_song(str(ctx.guild_id))
         if track is None:
-            message = "No non-empty playlists have been added to the playlist pool. Use `/add_plalist` to add playlists to the playlist pool."
+            message = ("No non-empty playlists have been added to the "
+                       "playlist pool. Use `/add_plalist` to add playlists to "
+                       "the playlist pool.")
         else:
             message = track
         await ctx.interaction.edit_original_response(content=message)
 
     @bot.slash_command(
         name="next_time",
-        description="Retrieve the next time (UTC) when the bot will attempt to post a song"
+        description="Retrieve the next time (UTC) when the bot will attempt "
+                    "to post a song"
     )
     async def next_time(ctx: discord.ApplicationContext):
         time_next = bot.get_time_config(str(ctx.guild_id))
         if time_next is None:
-            await ctx.respond("A daily time has not been set. Use `/set_time` to set a daily time.")
+            await ctx.respond("A daily time has not been set. Use `/set_time` "
+                              "to set a daily time.")
             return
         channel = bot.get_channel_config(str(ctx.guild_id))
         if channel is None:
-            await ctx.respond("A channel in which to post the daily song has not been set. Use `/set_channel` to set the channel.")
-        await ctx.respond(content=f"The bot will attempt to post the next song at `{time_next}` (UTC)")
+            await ctx.respond("A channel in which to post the daily song has "
+                              "not been set. Use `/set_channel` to set the "
+                              "channel.")
+        await ctx.respond(content=f"The bot will attempt to post the next "
+                                  f"song at `{time_next}` (UTC)")
 
     @bot.slash_command(
         name="current_configuration",
@@ -424,28 +467,44 @@ if __name__ == "__main__":
         playlist_config = bot.get_playlists(str(ctx.guild_id))
 
         if time_config is not None:
-            time_config_message = f"The daily time is set to: `{time_config}` (UTC)."
+            time_config_message = (f"The daily time is set to: "
+                                   f"`{time_config}` (UTC).")
         else:
-            time_config_message = "A daily time has not been set. Use `/set_time` to set a daily time."
+            time_config_message = ("A daily time has not been set. Use "
+                                   "`/set_time` to set a daily time.")
 
         if channel_config is not None:
-            channel_config_message = f"The channel in which the daily song will be posted is set to <#{channel_config}>."
+            channel_config_message = (f"The channel in which the daily song "
+                                      f"will be posted is set to "
+                                      f"<#{channel_config}>.")
         else:
-            channel_config_message = "A channel in which to post the daily song has not been set. Use `/set_channel` to set the channel."
+            channel_config_message = ("A channel in which to post the daily "
+                                      "song has not been set. Use "
+                                      "`/set_channel` to set the channel.")
 
         if role_config is not None:
             if role_config == "@everyone":
                 role_mention = role_config
             else:
                 role_mention = f"<@&{role_config}>"
-            role_config_message = f"The notification role is set to {role_mention}."
+            role_config_message = (f"The notification role is set to "
+                                   f"{role_mention}.")
         else:
-            role_config_message = "A notification role has not been set. Use `/set_role` to set a notification role."
+            role_config_message = ("A notification role has not been set. "
+                                   "Use `/set_role` to set a notification "
+                                   "role.")
 
         if playlist_config is not None:
-            playlist_config_message = "The playlist pool contains the following playlists:\n" + ''.join(f'  - <https://open.spotify.com/playlist/{playlist_id}>\n' for playlist_id in playlist_config)
+            playlist_config_message = (
+                    "The playlist pool contains the following playlists:\n"
+                    + ''.join(f'  - <https://open.spotify.com/playlist/'
+                              f'{playlist_id}>\n'
+                              for playlist_id in playlist_config)
+            )
         else:
-            playlist_config_message = "The playlist pool contains no playlists. Use `/add_playlist` to add playlists to the playlist pool."
+            playlist_config_message = ("The playlist pool contains no "
+                                       "playlists. Use `/add_playlist` to add "
+                                       "playlists to the playlist pool.")
 
         message = f"**Current configuration**:\n" \
                   f"- {time_config_message}\n" \
@@ -457,7 +516,7 @@ if __name__ == "__main__":
 
     @bot.slash_command(
         name="exit_bot",
-        description="Exits the bot"
+        description="Exits the bot."
     )
     async def exit_bot(ctx):
         await ctx.respond("Exiting bot")
