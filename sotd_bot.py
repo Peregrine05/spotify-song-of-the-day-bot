@@ -22,9 +22,8 @@ class SOTDBot(discord.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.spotipy_app = spotipy.Spotify(
-            auth_manager=spotipy.oauth2.SpotifyClientCredentials(
-                client_id=os.getenv("SPOTIFY_APP_ID"),
-                client_secret=os.getenv("SPOTIFY_APP_SECRET")))
+            auth_manager=spotipy.oauth2.SpotifyClientCredentials()
+        )
         self.config = {}
         self.times = {}
         self.next_time = None
