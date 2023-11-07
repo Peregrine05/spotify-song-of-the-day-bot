@@ -214,11 +214,14 @@ class SOTDBot(discord.Bot):
         for playlist in playlists:
             offset = 0
             while True:
-                playlist_items = self.spotipy_app.playlist_items(
-                    playlist_id=playlist,
-                    limit=50,
-                    offset=offset
-                )
+                try:
+                    playlist_items = self.spotipy_app.playlist_items(
+                        playlist_id=playlist,
+                        limit=50,
+                        offset=offset
+                    )
+                except spotipy.SpotifyException:
+                    break
                 for item in playlist_items["items"]:
                     url = item["track"]["external_urls"]["spotify"]
                     aggregate_playlist_items.append(url)
@@ -226,6 +229,7 @@ class SOTDBot(discord.Bot):
                     break
                 offset += 50
                 time.sleep(1.5)
+            time.sleep(1.5)
         if not len(aggregate_playlist_items):
             return None
         track = random.choice(aggregate_playlist_items)
