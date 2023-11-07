@@ -453,7 +453,7 @@ if __name__ == "__main__":
                               "not been set. Use `/set_channel` to set the "
                               "channel.")
         await ctx.respond(content=f"The bot will attempt to post the next "
-                                  f"song at `{time_next}` (UTC)")
+                                  f"song at `{time_next}` (UTC).")
 
     @bot.slash_command(
         name="current_configuration",
