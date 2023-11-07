@@ -8,8 +8,8 @@
   - Select `Web API` to be used.
   - Read and agree to the developer agreement, and then save the application.
 - In the page to which you are redirected, in the top-right corner of the page, click `Settings`.
-  - Copy the `Client ID`, and paste it into the `.env` file, after `SPOTIFY_APP_ID`, such that the line reads, for example: `SPOTIFY_APP_ID = 90d68b285173108bbe3349574480efd7`.
-  - Copy the `Client secret`, and paste it into the `.env` file, after `SPOTIFY_APP_SECRET`, such that the line reads, for example: `SPOTIFY_APP_SECRET = f8799153c6314f068e3d750bd166a47d`.
+  - Copy the `Client ID`, and paste it into the `.env` file, after `SPOTIPY_CLIENT_ID`, such that the line reads, for example: `SPOTIFY_APP_ID = 90d68b285173108bbe3349574480efd7`.
+  - Copy the `Client secret`, and paste it into the `.env` file, after `SPOTIPY_CLIENT_SECRET`, such that the line reads, for example: `SPOTIFY_APP_SECRET = f8799153c6314f068e3d750bd166a47d`.
 - Go to https://discord.com/developers/applications and create a new Discord application.
 - Go to the `Bot` tab.
   - Name the bot however you want and upload an avatar, if desired.
